@@ -868,8 +868,9 @@ struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
     // custom_op(T& x)
     custom_op(custom_op_base& x)
     {
+        using T = custom_op_base;
         this->make_handle(&migraphx_custom_op_create, &x);
-        this->set_fp<T>(&migraphx_custom_op_compute,
+        this->set_fp<T>(&migraphx_custom_op_set_compute,
                         [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
                             auto r = obj.compute({args, borrow{}});
                             r.assign_to(out);
