@@ -1246,4 +1246,4 @@ struct custom_op
     {
         return op.compute(args);
     }
-}
+};

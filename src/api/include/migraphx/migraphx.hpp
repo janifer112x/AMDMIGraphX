@@ -190,6 +190,12 @@ struct handle_base
         m_handle = std::shared_ptr<U>{ptr, [](U*) {}};
     }
 
+    template <class U>
+    void assign_to(U* ptr)
+    {
+        (void)ptr;
+    }
+
     protected:
     std::shared_ptr<T> m_handle;
 };
@@ -858,14 +864,15 @@ struct custom_op_base
 
 struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
 {
-    template <class T>
-    custom_op(T& x)
+    // template <class T>
+    // custom_op(T& x)
+    custom_op(custom_op_base& x)
     {
         this->make_handle(&migraphx_custom_op_create, &x);
         this->set_fp<T>(&migraphx_custom_op_compute,
                         [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
                             auto r = obj.compute({args, borrow{}});
-                            // r.assign_to(out);
+                            r.assign_to(out);
                         });
     }
 
