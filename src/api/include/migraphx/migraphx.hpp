@@ -850,6 +850,48 @@ quantize_int8(const program& prog, const target& ptarget, const quantize_int8_op
          options.get_handle_ptr());
 }
 
+struct custom_op_base
+{
+    virtual argument compute(arguments args) const = 0;
+    virtual ~custom_op_base() {}
+};
+
+
+struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
+{
+    template<class T>
+    custom_op(T& x)
+    { 
+        this->make_handle(&migraphx_custom_op_create, &x); 
+        this->set_fp<T>(&migraphx_custom_op_compute, [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
+            auto r = obj.compute({args, borrow{}});
+            // r.assign_to(out);
+        });
+    }
+
+    template<class T, class Setter, class F>
+    void set_fp(Setter setter, F pf)
+    {
+        static F f = pf;
+        call(setter, this->get_handle_ptr(), [](void* obj, auto... xs) -> migraphx_status {
+            try
+            {
+                T* x = reinterpret_cast<T*>(obj);
+                f(*x, xs...);
+                return migraphx_status_success;
+            }
+            catch(...) 
+            {
+                return migraphx_status_unknown_error;
+            }
+        });
+    }
+
+    custom_op(migraphx_custom_op* p, own) { this->set_handle(p, own{}); }
+
+    custom_op(migraphx_custom_op* p, borrow) { this->set_handle(p, borrow{}); }
+};
+
 #ifndef DOXYGEN
 } // namespace api
 #endif

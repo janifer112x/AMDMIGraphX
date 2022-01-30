@@ -89,6 +89,9 @@ typedef const struct migraphx_quantize_op_names* const_migraphx_quantize_op_name
 typedef struct migraphx_quantize_int8_options* migraphx_quantize_int8_options_t;
 typedef const struct migraphx_quantize_int8_options* const_migraphx_quantize_int8_options_t;
 
+typedef struct migraphx_custom_op* migraphx_custom_op_t;
+typedef const struct migraphx_custom_op* const_migraphx_custom_op_t;
+
 migraphx_status migraphx_shape_destroy(migraphx_shape_t shape);
 
 migraphx_status migraphx_shape_create(migraphx_shape_t* shape,
@@ -308,6 +311,15 @@ migraphx_status migraphx_quantize_int8_options_add_calibration_data(
 migraphx_status migraphx_quantize_int8(migraphx_program_t prog,
                                        migraphx_target_t target,
                                        migraphx_quantize_int8_options_t options);
+
+
+migraphx_status migraphx_custom_op_destroy(migraphx_custom_op_t custom_op);
+
+migraphx_status migraphx_custom_op_create(migraphx_custom_op_t* custom_op, void* obj);
+
+typedef migraphx_status(*migraphx_custom_op_compute)(void*, migraphx_argument_t, migraphx_arguments_t);
+
+migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op, migraphx_custom_op_compute f);
 
 #ifdef __cplusplus
 }

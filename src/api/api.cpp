@@ -1214,3 +1214,34 @@ extern "C" migraphx_status migraphx_quantize_int8(migraphx_program_t prog,
     });
     return api_error_result;
 }
+
+extern "C" struct migraphx_custom_op;
+struct migraphx_custom_op
+{
+    void* obj;
+    migraphx_custom_op_compute compute_f;
+
+    migraphx::argument compute(std::vector<migraphx::argument> args) const
+    {
+        migraphx_argument api_result;
+        auto api_error_result = compute_f(obj, &api_result, object_cast<migraphx_arguments_t>(&args));
+        if (api_error_result != migraphx_status_success)
+            MIGRAPHX_THROW(api_error_result, "Error calling compute.");
+        return api_result.object;
+    }    
+};
+
+extern "C" migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op, migraphx_custom_op_compute f)
+{
+    custom_op->compute_f = f;
+    return migraphx_status_success;
+}
+
+struct custom_op
+{
+    migraphx_custom_op op;
+    migraphx::argument compute(std::vector<migraphx::argument> args) const
+    {
+        return op.compute(args);
+    }
+}
