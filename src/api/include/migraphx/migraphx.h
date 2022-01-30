@@ -312,14 +312,16 @@ migraphx_status migraphx_quantize_int8(migraphx_program_t prog,
                                        migraphx_target_t target,
                                        migraphx_quantize_int8_options_t options);
 
-
 migraphx_status migraphx_custom_op_destroy(migraphx_custom_op_t custom_op);
 
 migraphx_status migraphx_custom_op_create(migraphx_custom_op_t* custom_op, void* obj);
 
-typedef migraphx_status(*migraphx_custom_op_compute)(void*, migraphx_argument_t, migraphx_arguments_t);
+typedef migraphx_status (*migraphx_custom_op_compute)(void*,
+                                                      migraphx_argument_t,
+                                                      migraphx_arguments_t);
 
-migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op, migraphx_custom_op_compute f);
+migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op,
+                                               migraphx_custom_op_compute f);
 
 #ifdef __cplusplus
 }

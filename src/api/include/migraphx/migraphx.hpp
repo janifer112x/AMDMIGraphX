@@ -856,20 +856,20 @@ struct custom_op_base
     virtual ~custom_op_base() {}
 };
 
-
 struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
 {
-    template<class T>
+    template <class T>
     custom_op(T& x)
-    { 
-        this->make_handle(&migraphx_custom_op_create, &x); 
-        this->set_fp<T>(&migraphx_custom_op_compute, [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
-            auto r = obj.compute({args, borrow{}});
-            // r.assign_to(out);
-        });
+    {
+        this->make_handle(&migraphx_custom_op_create, &x);
+        this->set_fp<T>(&migraphx_custom_op_compute,
+                        [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
+                            auto r = obj.compute({args, borrow{}});
+                            // r.assign_to(out);
+                        });
     }
 
-    template<class T, class Setter, class F>
+    template <class T, class Setter, class F>
     void set_fp(Setter setter, F pf)
     {
         static F f = pf;
@@ -880,7 +880,7 @@ struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
                 f(*x, xs...);
                 return migraphx_status_success;
             }
-            catch(...) 
+            catch(...)
             {
                 return migraphx_status_unknown_error;
             }

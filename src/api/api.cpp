@@ -1224,14 +1224,16 @@ struct migraphx_custom_op
     migraphx::argument compute(std::vector<migraphx::argument> args) const
     {
         migraphx_argument api_result;
-        auto api_error_result = compute_f(obj, &api_result, object_cast<migraphx_arguments_t>(&args));
-        if (api_error_result != migraphx_status_success)
+        auto api_error_result =
+            compute_f(obj, &api_result, object_cast<migraphx_arguments_t>(&args));
+        if(api_error_result != migraphx_status_success)
             MIGRAPHX_THROW(api_error_result, "Error calling compute.");
         return api_result.object;
-    }    
+    }
 };
 
-extern "C" migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op, migraphx_custom_op_compute f)
+extern "C" migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op,
+                                                          migraphx_custom_op_compute f)
 {
     custom_op->compute_f = f;
     return migraphx_status_success;
