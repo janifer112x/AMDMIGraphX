@@ -1215,32 +1215,28 @@ extern "C" migraphx_status migraphx_quantize_int8(migraphx_program_t prog,
     return api_error_result;
 }
 
-template<class C, class D>
+template <class C, class D>
 struct manage_generic_ptr
 {
     manage_generic_ptr() = default;
 
     manage_generic_ptr(void* pdata, C pcopier, D pdeleter)
-        : data(pdata)
-        , copier(pcopier)
-        , deleter(pdeleter)
+        : data(pdata), copier(pcopier), deleter(pdeleter)
     {
     }
 
     manage_generic_ptr(const manage_generic_ptr& rhs)
-    : data(nullptr), copier(rhs.copier), deleter(rhs.deleter)
+        : data(nullptr), copier(rhs.copier), deleter(rhs.deleter)
     {
         if(copier)
             copier(&data, rhs.data);
     }
 
     manage_generic_ptr(manage_generic_ptr&& other)
-        : data(other.data)
-        , copier(other.copier)
-        , deleter(other.deleter)
+        : data(other.data), copier(other.copier), deleter(other.deleter)
     {
-        other.data = nullptr;
-        other.copier = nullptr;
+        other.data    = nullptr;
+        other.copier  = nullptr;
         other.deleter = nullptr;
     }
 
@@ -1259,8 +1255,8 @@ struct manage_generic_ptr
     }
 
     void* data = nullptr;
-    C copier = nullptr;
-    D deleter = nullptr;
+    C copier   = nullptr;
+    D deleter  = nullptr;
 };
 
 extern "C" struct migraphx_custom_op;
