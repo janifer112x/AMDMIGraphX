@@ -1215,17 +1215,66 @@ extern "C" migraphx_status migraphx_quantize_int8(migraphx_program_t prog,
     return api_error_result;
 }
 
+template<class C, class D>
+struct manage_generic_ptr
+{
+    manage_generic_ptr() = default;
+
+    manage_generic_ptr(void* pdata, C pcopier, D pdeleter)
+        : data(pdata)
+        , copier(pcopier)
+        , deleter(pdeleter)
+    {
+    }
+
+    manage_generic_ptr(const manage_generic_ptr& rhs)
+    : data(nullptr), copier(rhs.copier), deleter(rhs.deleter)
+    {
+        if(copier)
+            copier(&data, rhs.data);
+    }
+
+    manage_generic_ptr(manage_generic_ptr&& other)
+        : data(other.data)
+        , copier(other.copier)
+        , deleter(other.deleter)
+    {
+        other.data = nullptr;
+        other.copier = nullptr;
+        other.deleter = nullptr;
+    }
+
+    manage_generic_ptr& operator=(manage_generic_ptr rhs)
+    {
+        std::swap(data, rhs.data);
+        std::swap(copier, rhs.copier);
+        std::swap(deleter, rhs.deleter);
+        return *this;
+    }
+
+    ~manage_generic_ptr()
+    {
+        if(data != nullptr)
+            deleter(data);
+    }
+
+    void* data = nullptr;
+    C copier = nullptr;
+    D deleter = nullptr;
+};
+
 extern "C" struct migraphx_custom_op;
 struct migraphx_custom_op
 {
-    void* obj;
+    manage_generic_ptr<migraphx_custom_op_copy, migraphx_custom_op_deleter> obj;
+    migraphx_custom_op_copy copy_f;
     migraphx_custom_op_compute compute_f;
 
     migraphx::argument compute(std::vector<migraphx::argument> args) const
     {
         migraphx_argument api_result;
         auto api_error_result =
-            compute_f(obj, &api_result, object_cast<migraphx_arguments_t>(&args));
+            compute_f(obj.data, &api_result, object_cast<migraphx_arguments_t>(&args));
         if(api_error_result != migraphx_status_success)
             MIGRAPHX_THROW(api_error_result, "Error calling compute.");
         return api_result.object;

@@ -320,6 +320,11 @@ typedef migraphx_status (*migraphx_custom_op_compute)(void*,
                                                       migraphx_argument_t,
                                                       migraphx_arguments_t);
 
+typedef migraphx_status (*migraphx_custom_op_to_json)(void*, const char**);
+
+typedef migraphx_status (*migraphx_custom_op_copy)(void** out, void* in);
+typedef migraphx_status (*migraphx_custom_op_deleter)(void* in);
+
 migraphx_status migraphx_custom_op_set_compute(migraphx_custom_op_t custom_op,
                                                migraphx_custom_op_compute f);
 

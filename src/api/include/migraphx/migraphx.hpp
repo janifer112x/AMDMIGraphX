@@ -859,6 +859,7 @@ quantize_int8(const program& prog, const target& ptarget, const quantize_int8_op
 struct custom_op_base
 {
     virtual argument compute(arguments args) const = 0;
+    virtual std::string to_json() const = 0;
     virtual ~custom_op_base() {}
 };
 
@@ -874,6 +875,13 @@ struct custom_op : MIGRAPHX_HANDLE_BASE(custom_op)
                         [](T& obj, migraphx_argument_t out, migraphx_arguments_t args) {
                             auto r = obj.compute({args, borrow{}});
                             r.assign_to(out);
+                        });
+
+        this->set_fp<T>(&migraphx_custom_op_set_to_json,
+                        [](T& obj, const char** out) {
+                            std::string r = obj.to_json();
+                            *out = r.c_str();
+                            // r.assign_to(out);
                         });
     }
 
