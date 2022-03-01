@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Determine free space before
       run: |
-        echo "FREE_GIG_BEFORE=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')" >> $GITHUB_ENV
+        echo "FREE_GIG_BEFORE=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
     - name: Free space
       run: sudo rm -rf /usr/local/android /usr/share/dotnet /usr/local/share/boost /opt/ghc /usr/local/share/chrom* /usr/share/swift /usr/local/julia*
     - uses: actions/checkout@v2
@@ -51,11 +51,11 @@ jobs:
     - name: Determine free space after
       run: |
         echo "FREE_GIG_AFTER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
-        echo "FREE_GIG_AFTER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')" >> $GITHUB_ENV
-        FREED_GIG=$(expr ${FREE_GIG_AFTER} - ${FREE_GIG_BEFORE})
-        echo "Free space before: ${FREE_GIG_BEFORE}G"
-        echo "Free space after : ${FREE_GIG_AFTER}G"
-        echo "Space freed      : ${FREED_GIG}G"
+        # echo "FREE_GIG_AFTER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')" >> $GITHUB_ENV
+        # FREED_GIG=$(expr ${FREE_GIG_AFTER} - ${FREE_GIG_BEFORE})
+        # echo "Free space before: ${FREE_GIG_BEFORE}G"
+        # echo "Free space after : ${FREE_GIG_AFTER}G"
+        # echo "Space freed      : ${FREED_GIG}G"
 
     - name: Clang tidy
       # shell: bash -c "docker run -i -v=$GITHUB_WORKSPACE:/data -w /data migraphx bash < {0}"
@@ -77,6 +77,7 @@ jobs:
 
     steps:
     - name: Free space
+      echo "FREE_GIG_BEFORE=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
       run: sudo rm -rf /usr/local/android /usr/share/dotnet /usr/local/share/boost /opt/ghc /usr/local/share/chrom* /usr/share/swift /usr/local/julia*
     - uses: actions/checkout@v2
 
@@ -105,6 +106,8 @@ jobs:
 
     - name: Build the Docker image
       run: docker build . --file hip-clang.docker --tag migraphx
+          echo "FREE_GIG_AFTER_DOCKER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
+
 
     - name: Cppcheck
       shell: bash -c "docker run -i -v=$GITHUB_WORKSPACE:/data -w /data migraphx bash < {0}"
@@ -122,7 +125,10 @@ jobs:
 
     steps:
     - name: Free space
-      run: sudo rm -rf /usr/local/android /usr/share/dotnet /usr/local/share/boost /opt/ghc /usr/local/share/chrom* /usr/share/swift /usr/local/julia*
+      run: |
+            echo "FREE_GIG_BEFORE=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
+            sudo rm -rf /usr/local/android /usr/share/dotnet /usr/local/share/boost /opt/ghc /usr/local/share/chrom* /usr/share/swift /usr/local/julia*
+            echo "FREE_GIG_AFTER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
     - uses: actions/checkout@v2
 
     # In this step, this action saves a list of existing images,
@@ -134,6 +140,7 @@ jobs:
 
     - name: Build the Docker image
       run: docker build . --file hip-clang.docker --tag migraphx
+           echo "FREE_GIG_AFTER_DOCKER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
 
     - name: Check formatting
       shell: bash -c "docker run -i -v=$GITHUB_WORKSPACE:/data -w /data migraphx bash < {0}"
