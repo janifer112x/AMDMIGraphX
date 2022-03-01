@@ -3,14 +3,7 @@ name: migraphx
 on: [push, pull_request]
 
 jobs:
-  cancel:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.6.0
-        with:
-          access_token: ${{ github.token }}
-  tidy:
+  tmate:
     runs-on: ubuntu-18.04
 
     steps:
