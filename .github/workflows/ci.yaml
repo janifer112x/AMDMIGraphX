@@ -98,7 +98,8 @@ jobs:
             cppcheck-cache-${{ hashFiles('cppcheck.rules', 'CMakeLists.txt') }}-${{ steps.cache_timestamp.outputs.timestamp }}
             cppcheck-cache-${{ hashFiles('cppcheck.rules', 'CMakeLists.txt') }}-
     - name: Build the Docker image
-      run: docker build . --file hip-clang.docker --tag migraphx
+      run: |
+          docker build . --file hip-clang.docker --tag migraphx
           echo "FREE_GIG_AFTER_DOCKER=$(df --output=avail --sync -BG "${{ github.workspace }}" | tail -1 | sed 's/[^0-9]*//g')"
 
 
