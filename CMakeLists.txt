@@ -59,6 +59,9 @@ endif()
 # Disable cpu backend by default
 set(MIGRAPHX_ENABLE_CPU Off CACHE BOOL "")
 
+# Disable fpga backend by default
+set(MIGRAPHX_ENABLE_FPGA Off CACHE BOOL "")
+
 set(CMAKE_CXX_STANDARD_DEFAULT "")
 add_compile_options(-std=c++17)
 
@@ -178,7 +181,7 @@ rocm_enable_cppcheck(
         style
         performance
         portability
-    SUPPRESS 
+    SUPPRESS
         ConfigurationNotChecked
         unmatchedSuppression
         unusedFunction

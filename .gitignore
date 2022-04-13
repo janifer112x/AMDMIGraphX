@@ -53,7 +53,7 @@
 # Directories to ignore (do not add trailing '/'s, they skip symlinks).
 #==============================================================================#
 # Nested build directory
-/build*
+build*
 
 # Downloaded models
 test/onnx/models

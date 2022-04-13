@@ -18,7 +18,8 @@ int main(int argc, char** argv)
                   << "options:" << std::endl
                   << "\t -c, --cpu      Compile for CPU" << std::endl
                   << "\t -g, --gpu      Compile for GPU" << std::endl
-                  << "\t -f, --fp16     FP16 Quantization" << std::endl
+                  << "\t -f, --fpga     Compile for FPGA" << std::endl
+                  << "\t -d, --fp16     FP16 Quantization" << std::endl
                   << "\t -i, --int8     Int8 Quantization" << std::endl
                   << "\t       --cal    Int8 Calibration ON" << std::endl
                   << "\t -p, --print    Print Graph at Each Stage" << std::endl
@@ -32,7 +33,9 @@ int main(int argc, char** argv)
                      std::find(begin, end, std::string("--cpu")) != end;
     const bool GPU = std::find(begin, end, std::string("-g")) != end ||
                      std::find(begin, end, std::string("--gpu")) != end;
-    const bool FP16 = std::find(begin, end, std::string("-f")) != end ||
+    const bool FPGA = std::find(begin, end, std::string("-f")) != end ||
+                     std::find(begin, end, std::string("--fpga")) != end;
+    const bool FP16 = std::find(begin, end, std::string("-d")) != end ||
                       std::find(begin, end, std::string("--fp16")) != end;
     const bool INT8 = std::find(begin, end, std::string("-i")) != end ||
                       std::find(begin, end, std::string("--int8")) != end;
@@ -52,6 +55,8 @@ int main(int argc, char** argv)
     std::string target_str;
     if(CPU)
         target_str = "cpu";
+    else if(FPGA)
+        target_str = "fpga";
     else if(GPU)
         target_str = "gpu";
     else
@@ -102,6 +107,10 @@ int main(int argc, char** argv)
         migraphx::compile_options comp_opts;
         comp_opts.set_offload_copy();
         prog.compile(targ, comp_opts);
+    }
+    else if(FPGA)
+    {
+        prog.compile(targ);
     }
     else
     {
