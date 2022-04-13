@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     const bool GPU = std::find(begin, end, std::string("-g")) != end ||
                      std::find(begin, end, std::string("--gpu")) != end;
     const bool FPGA = std::find(begin, end, std::string("-f")) != end ||
-                     std::find(begin, end, std::string("--fpga")) != end;
+                      std::find(begin, end, std::string("--fpga")) != end;
     const bool FP16 = std::find(begin, end, std::string("-d")) != end ||
                       std::find(begin, end, std::string("--fp16")) != end;
     const bool INT8 = std::find(begin, end, std::string("-i")) != end ||
