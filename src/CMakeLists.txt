@@ -4,7 +4,7 @@ include(ROCMPackageConfigHelpers)
 include(RegisterOp)
 include(CheckCXXLinkerFlag)
 
-add_library(migraphx 
+add_library(migraphx
     adjust_allocation.cpp
     analyze_streams.cpp
     apply_alpha_beta.cpp
@@ -240,6 +240,11 @@ add_subdirectory(targets/gpu)
 target_link_libraries(migraphx_all_targets INTERFACE migraphx_gpu)
 target_compile_definitions(migraphx_all_targets INTERFACE -DHAVE_GPU)
 endif()
+if(MIGRAPHX_ENABLE_FPGA)
+add_subdirectory(targets/fpga)
+target_link_libraries(migraphx_all_targets INTERFACE migraphx_fpga)
+target_compile_definitions(migraphx_all_targets INTERFACE -DHAVE_FPGA)
+endif()
 
 if(HAVE_HALF_EXPR)
     target_compile_definitions(migraphx PUBLIC -DHAS_HALF_V1)
@@ -252,5 +257,3 @@ rocm_export_targets(
     Threads
     ${PACKAGE_DEPENDS}
 )
- 
-
