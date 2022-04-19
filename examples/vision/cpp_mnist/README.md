@@ -1,18 +1,23 @@
 # Performing Inference Using C++ API
 
 ## Description
-This example demonstrates how to perform inference using the MIGraphX C++ API. The model used is a convolutional network pre-trained on the MNIST dataset, and inference is performed on a random digit selected from the test set. 
+This example demonstrates how to perform inference using the MIGraphX C++ API. The model used is a convolutional network pre-trained on the MNIST dataset, and inference is performed on a random digit selected from the test set.
 
 ## Content
-- [Basic Setup](#Basic-Setup)
-- [Quantization](#Quantization)
-- [Compilation](#Compilation)
-- [Preparing Input Data](#Preparing-Input-Data)
-- [Evaluating Inputs and Handling Outputs](#Evaluating-Inputs-and-Handling-Outputs)
-- [**Running this Example**](#Running-this-Example)
+- [Performing Inference Using C++ API](#performing-inference-using-c-api)
+  - [Description](#description)
+  - [Content](#content)
+  - [Basic Setup](#basic-setup)
+  - [Quantization](#quantization)
+        - [Floating Point 16-bit Precision](#floating-point-16-bit-precision)
+        - [Integer 8-bit Precision](#integer-8-bit-precision)
+  - [Compilation](#compilation)
+  - [Preparing Input Data](#preparing-input-data)
+  - [Evaluating Inputs and Handling Outputs](#evaluating-inputs-and-handling-outputs)
+  - [Running this Example](#running-this-example)
 
 ## Basic Setup
-Before running inference, we must first instantiate a network graph and select a compilation target. See [this example](../cpp_parse_load_save) for more information about working with MIGraphX program objects. 
+Before running inference, we must first instantiate a network graph and select a compilation target. See [this example](../../migraphx/cpp_parse_load_save) for more information about working with MIGraphX program objects.
 ```
 migraphx::program prog;
 migraphx::onnx_options onnx_opts;
@@ -29,7 +34,7 @@ migraphx::target targ = migraphx::target(target_str.c_str());
 ```
 
 ## Quantization
-Optionally, graph programs may be quantized to fp16 or int8 precision to improve performance and memory usage. 
+Optionally, graph programs may be quantized to fp16 or int8 precision to improve performance and memory usage.
 
 ##### Floating Point 16-bit Precision
 To quantize using fp16, we simply add the following line:
@@ -38,7 +43,7 @@ migraphx::quantize_fp16(prog);
 ```
 
 ##### Integer 8-bit Precision
-Int8 quantization requires calibration to accurately map ranges of floating point values onto integer values. 
+Int8 quantization requires calibration to accurately map ranges of floating point values onto integer values.
 
 To calibrate prior to inference, one or more inputs can be supplied as follows:
 ```
@@ -57,33 +62,33 @@ quant_opts.add_calibration_data(quant_params);
 migraphx::quantize_int8(prog, targ, quant_opts);
 ```
 
-## Compilation 
-Network graphs saved in e.g. ONNX or protobuf format are not target-specific. In order to run inference, we must compile the graph into a target-specific program. 
+## Compilation
+Network graphs saved in e.g. ONNX or protobuf format are not target-specific. In order to run inference, we must compile the graph into a target-specific program.
 
 Two options may be turned on when compiling:
 - `set_offload_copy(bool value)`: For targets with offloaded memory (such as the gpu), this will insert instructions during compilation to copy the input parameters to the offloaded memory and to copy the final result from the offloaded memory back to main memory. Default value is `false` for offload_copy.
-- `set_fast_math(bool value)`: Optimize math functions to use faster approximate versions. There may be slight accuracy degredation when enabled. Default value is `true` for fast_math. 
+- `set_fast_math(bool value)`: Optimize math functions to use faster approximate versions. There may be slight accuracy degradation when enabled. Default value is `true` for fast_math.
 
 The following snippet assumes `targ` has been set as "gpu", and will compile the program without the fast_math optimization.
 ```
 migraphx::compile_options comp_opts;
 comp_opts.set_offload_copy();
 prog.compile(targ, comp_opts);
-``` 
+```
 
 To compile a program with the default options, we simply call:
 ```
 prog.compile(targ);
 ```
 
-The targets "ref" and "cpu" both compile the program to run on the CPU. The target "ref" is primarily used for correctness checking. The target "cpu" is under ongoing development and has more optimizations enabled. Additionally, the "cpu" target requires MIGraphX to be built with the `-DMIGRAPHX_ENABLE_CPU=On` flag. Specifically, 
+The targets "ref" and "cpu" both compile the program to run on the CPU. The target "ref" is primarily used for correctness checking. The target "cpu" is under ongoing development and has more optimizations enabled. Additionally, the "cpu" target requires MIGraphX to be built with the `-DMIGRAPHX_ENABLE_CPU=On` flag. Specifically,
 ```
 CXX=/opt/rocm/llvm/bin/clang++ cmake -DMIGRAPHX_ENABLE_CPU=On ..
 ```
 
 ## Preparing Input Data
-Now that we have a compiled program, the last step to perform infernce is to prepare the input data as program parameters. 
-The first step is to read in the data and store it in a `std::vector<float>` we will in this case call `digit`. 
+Now that we have a compiled program, the last step to perform inference is to prepare the input data as program parameters.
+The first step is to read in the data and store it in a `std::vector<float>` we will in this case call `digit`.
 Next, we create a program parameter containing the data stored in `digit`:
 ```
 migraphx::program_parameters prog_params;
@@ -100,7 +105,7 @@ Now that everything is in place, the final step to run inference is to call:
 auto outputs = prog.eval(prog_params);
 ```
 
-The output layer(s) will be returned and stored in `outputs`. Our network for this example returns a single output layer with the shape (1, 10). The index of the largest value in this output layer corresponds to the digit that the model has predicted. 
+The output layer(s) will be returned and stored in `outputs`. Our network for this example returns a single output layer with the shape (1, 10). The index of the largest value in this output layer corresponds to the digit that the model has predicted.
 ```
 auto shape   = outputs[0].get_shape();
 auto lengths = shape.lengths();
@@ -110,7 +115,7 @@ float* max     = std::max_element(results, results + num_results);
 int answer     = max - results;
 ```
 
-Other networks may require alternative processing of outputs. 
+Other networks may require alternative processing of outputs.
 
 
 ## Running this Example
@@ -137,7 +142,7 @@ Parsing ONNX model...
 
 Compiling program for ref...
 
-Model input: 
+Model input:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -178,4 +183,4 @@ CORRECT
 
 ```
 
-*Note: the actual digit selected and printed will not necessarily be the same as shown above. 
+*Note: the actual digit selected and printed will not necessarily be the same as shown above.
