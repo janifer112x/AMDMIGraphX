@@ -17,9 +17,10 @@ namespace fpga {
 
 std::string target::name() const { return "fpga"; }
 
-std::vector<pass> target::get_passes(migraphx::context&, const compile_options&) const
+std::vector<pass> target::get_passes(migraphx::context& gctx, const compile_options&) const
 {
     // not sure if all these passes are needed but they were copied from ref/
+    auto& ctx = any_cast<context>(gctx);
     return {normalize_ops{},
             eliminate_pad{},
             dead_code_elimination{},
@@ -31,7 +32,7 @@ std::vector<pass> target::get_passes(migraphx::context&, const compile_options&)
             dead_code_elimination{},
             partitioning{},
             dead_code_elimination{},
-            lowering{},
+            lowering{&ctx},
             dead_code_elimination{}};
 }
 

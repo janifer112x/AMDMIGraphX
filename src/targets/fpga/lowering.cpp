@@ -36,8 +36,9 @@ struct fpga_vitis_op
         return xmodel_.get_shape();
     }
 
-    argument compute(const shape& output_shape, std::vector<argument> args) const
+    argument compute(context& ctx, const shape& output_shape, std::vector<argument> args) const
     {
+        std::cout << "The context is " << ctx.foo << std::endl;
         return ::vitis_ai::execute(xmodel_, output_shape, args);
     }
 };
@@ -45,11 +46,10 @@ MIGRAPHX_REGISTER_OP(fpga_vitis_op)
 
 void lowering::apply(module& m) const
 {
-    std::cout << "In lowering" << std::endl;
-
-    m.debug_print();
-
     auto* mod = &m;
+
+    // test modifying the context from a pass
+    ctx->foo = 2;
 
     for(auto it : iterator_for(*mod))
     {

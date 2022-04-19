@@ -74,7 +74,7 @@ namespace fpga {
 
 bool is_fpga_instr(migraphx::instruction_ref it)
 {
-    return (!it->inputs().empty()) && (!migraphx::starts_with(it->name(), "@"));
+    return (!it->inputs().empty()) || (migraphx::starts_with(it->name(), "@"));
 }
 
 void partitioning::apply(module_pass_manager& mpm) const
@@ -86,7 +86,6 @@ void partitioning::apply(module_pass_manager& mpm) const
     migraphx::instruction_ref first = mod.end();
     migraphx::instruction_ref last;
     std::vector<migraphx::instruction_ref> literal_inputs;
-    std::unordered_map<migraphx::instruction_ref, migraphx::instruction_ref> ins_map;
     for(auto it : iterator_for(mod))
     {
         // assuming we want all the params/literals as inputs to the FPGA submodule
