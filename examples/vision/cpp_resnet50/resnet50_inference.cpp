@@ -38,7 +38,7 @@ void make_nxn(cv::Mat& image, int n)
     }
 }
 
-std::vector<float> preprocess(cv::Mat& image)
+cv::Mat preprocess(cv::Mat& image)
 {
     const auto image_size = 224;
     const auto channels   = 3;
@@ -57,20 +57,25 @@ std::vector<float> preprocess(cv::Mat& image)
         {
             for(int c = 0; c < 3; c++)
             {
-                image.at<cv::Vec3f>(h, w)[c] = (image.at<cv::Vec3f>(h, w)[c] - mean.at(c)) * scale;
+                image.at<cv::Vec3f>(h, w)[c] =
+                    (image.at<cv::Vec3f>(h, w)[c] - mean.at(c)) / std_dev.at(c);
             }
         }
     }
 
-    std::vector<float> chw_buffer(image.elemSize() * image.total());
-    cv::Mat transposed[4];
-    for(int j = 0; j < channels; j++)
-        transposed[j] = cv::Mat(
-            image.rows, image.cols, CV_32F, chw_buffer.data() + j * image_size * image_size);
-    std::swap(transposed[0], transposed[2]);
-    split(image, transposed);
+    int siz[] = {1, 3, image_size, image_size};
+    cv::Mat blob(4, siz, CV_32F);
+    blob = 0;
 
-    return chw_buffer;
+    std::vector<cv::Mat> slices = {
+        cv::Mat(image.rows, image.cols, CV_32F, blob.ptr<float>(0, 0)),
+        cv::Mat(image.rows, image.cols, CV_32F, blob.ptr<float>(0, 1)),
+        cv::Mat(image.rows, image.cols, CV_32F, blob.ptr<float>(0, 2)),
+    };
+    std::swap(slices[0], slices[2]);
+    cv::split(image, slices);
+
+    return blob;
 }
 
 // void calc_softmax(const float* data, size_t size, double* result) {
@@ -237,7 +242,7 @@ int main(int argc, char** argv)
         migraphx::program_parameters prog_params;
         auto param_shapes = prog.get_parameter_shapes();
         auto input        = param_shapes.names().front();
-        prog_params.add(input, migraphx::argument(param_shapes[input], data.data()));
+        prog_params.add(input, migraphx::argument(param_shapes[input], (float*)data.data));
 
         std::cout << "Model evaluating input..." << std::endl;
         auto start   = std::chrono::high_resolution_clock::now();
