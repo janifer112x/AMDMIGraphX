@@ -6,6 +6,7 @@
 #include <migraphx/iterator_for.hpp>
 #include "migraphx/make_op.hpp"
 #include "migraphx/ranges.hpp"
+#include <migraphx/register_op.hpp>
 #include <migraphx/stringutils.hpp>
 #include <migraphx/pass_manager.hpp>
 
@@ -71,6 +72,35 @@ insert_generic_instructions(module& m,
 }
 
 namespace fpga {
+
+struct fpga_placeholder_op
+{
+    fpga_placeholder_op() = default;
+
+    int dummy = 0;
+
+    template <class Self, class F>
+    static auto reflect(Self& self, F f)
+    {
+        return pack(f(self.dummy, "dummy"));
+    }
+
+    std::string name() const { return "fpga::vitis_placeholder"; }
+
+    shape compute_shape(const std::vector<shape>& inputs, std::vector<module_ref> mods) const
+    {
+        (void)inputs;
+        if(mods.size() != 1)
+        {
+            MIGRAPHX_THROW("should have one submodule.");
+        }
+        module_ref sm = mods.front();
+        if(sm->get_output_shapes().size() != 1)
+            MIGRAPHX_THROW("Only one return");
+        return sm->get_output_shapes().front();
+    }
+};
+MIGRAPHX_REGISTER_OP(fpga_placeholder_op)
 
 bool is_fpga_instr(migraphx::instruction_ref it)
 {
